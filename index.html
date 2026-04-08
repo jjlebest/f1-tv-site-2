@@ -375,6 +375,7 @@
       <button class="tab-btn" onclick="switchTab('constructors',this)">🏭 Constructeurs</button>
       <button class="tab-btn" onclick="switchTab('raceres',this);loadRaceResults()">🏁 Résultats Courses</button>
       <button class="tab-btn" onclick="switchTab('laptimes',this);loadStandingsLaps()">⏱ Meilleurs Tours</button>
+      <button class="tab-btn" onclick="switchTab('historique',this);loadHistorique()">📜 Historique</button>
     </div>
 
     <div class="tab-c active" id="tab-drivers">
@@ -417,6 +418,40 @@
         <div id="lapTimesData" style="padding:14px"><div class="loading-box"><span class="spinner"></span></div></div>
       </div>
     </div>
+
+    <!-- HISTORIQUE -->
+    <div class="tab-c" id="tab-historique">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+        <select id="histYear" onchange="loadHistorique()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:Barlow Condensed,sans-serif;font-size:13px;padding:7px 12px;border-radius:4px">
+          <option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option>
+          <option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option>
+          <option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option>
+          <option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option>
+          <option value="2013">2013</option><option value="2012">2012</option><option value="2011">2011</option>
+          <option value="2010">2010</option><option value="2008">2008</option><option value="2005">2005</option>
+          <option value="2000">2000</option><option value="1994">1994</option><option value="1988">1988</option>
+          <option value="1984">1984</option><option value="1976">1976</option><option value="1950">1950</option>
+        </select>
+        <select id="histRace" onchange="loadHistoriqueResult()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:Barlow Condensed,sans-serif;font-size:13px;padding:7px 12px;border-radius:4px;min-width:200px">
+          <option value="">— Choisir un Grand Prix —</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="loadHistorique()">🔄</button>
+      </div>
+
+      <div class="g2" style="margin-bottom:14px">
+        <div>
+          <div class="sec-title">🏆 Championnat Pilotes</div>
+          <div class="card"><div id="histDriverSt"><div class="loading-box"><span class="spinner"></span></div></div></div>
+        </div>
+        <div>
+          <div class="sec-title">🏭 Championnat Constructeurs</div>
+          <div class="card"><div id="histConstrSt"><div class="loading-box"><span class="spinner"></span></div></div></div>
+        </div>
+      </div>
+
+      <div class="sec-title" id="histRaceTitle" style="display:none">🏁 Résultat de course</div>
+      <div class="card" id="histRaceResult" style="display:none"><div class="loading-box"><span class="spinner"></span></div></div>
+    </div>
   </div>
 
   <!-- ==================== CALENDAR ==================== -->
@@ -439,8 +474,8 @@
         </div>
       </div>
       <div class="chat-foot">
-        <input class="chat-inp" id="chatInp" placeholder="Parlez de F1 avec Claude AI..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
-        <button class="btn" onclick="sendChat()">Envoyer ↑</button>
+        <input class="chat-inp" id="chatInp" placeholder="Parlez de F1 avec l'IA..." onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!this.disabled){event.preventDefault();sendChat()}">
+        <button class="btn" id="chatSendBtn" onclick="sendChat()">Envoyer ↑</button>
       </div>
     </div>
     <div style="margin-top:16px">
@@ -551,7 +586,7 @@
     </div>
 
     <!-- Row 5: Pilotes Session + Réunions -->
-    <div class="g2">
+    <div class="g2" style="margin-bottom:14px">
       <div class="card">
         <div class="card-hd">🏎 Pilotes de la Session</div>
         <div id="driverData" style="padding:0;overflow-x:auto"><div class="loading-box"><span class="spinner"></span></div></div>
@@ -559,6 +594,41 @@
       <div class="card">
         <div class="card-hd">📋 Infos Meeting & Session</div>
         <div id="meetingData" style="padding:14px;font-size:13.5px;color:var(--text2)">Chargement...</div>
+      </div>
+    </div>
+
+    <!-- Row 6: Championship en direct + Grille de départ + Overtakes -->
+    <div class="g3" style="margin-bottom:14px">
+      <div class="card">
+        <div class="card-hd">🏆 Championnat Live (OpenF1 β)</div>
+        <div id="champDriverData" style="padding:0;max-height:260px;overflow-y:auto"><div class="loading-box"><span class="spinner"></span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">🚦 Grille de Départ</div>
+        <div id="startGridData" style="padding:0;max-height:260px;overflow-y:auto"><div class="loading-box"><span class="spinner"></span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">⚡ Dépassements</div>
+        <div id="overtakesData" style="padding:14px;max-height:260px;overflow-y:auto"><div class="loading-box"><span class="spinner"></span></div></div>
+      </div>
+    </div>
+
+    <!-- Row 7: Résultat Session + GPS Location -->
+    <div class="g2">
+      <div class="card">
+        <div class="card-hd">🏁 Résultat Final Session</div>
+        <div id="sessionResultData" style="padding:0;overflow-x:auto"><div class="loading-box"><span class="spinner"></span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd" style="justify-content:space-between">
+          <span>📍 Position GPS Voitures (Location)</span>
+          <select id="locationDriverSel" onchange="loadLocationData()" style="background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:Barlow Condensed,sans-serif;font-size:11px;padding:2px 6px;border-radius:3px">
+            <option value="">Choisir pilote...</option>
+          </select>
+        </div>
+        <div id="locationData" style="padding:14px">
+          <div style="color:var(--text2);font-size:13px;text-align:center;padding:20px">Sélectionnez un pilote pour voir le tracé GPS</div>
+        </div>
       </div>
     </div>
   </div>
@@ -570,7 +640,35 @@
    CONFIG — Pollinations.ai (gratuit, sans clé, CORS OK)
    ============================================================ */
 const AI_URL = 'https://text.pollinations.ai/';
-const F1_SYSPROMPT = `Tu es un expert passionné de Formule 1 avec une connaissance encyclopédique de toute l'histoire de la F1 (1950 à aujourd'hui), des pilotes, équipes, circuits, règlements techniques et sportifs, des stratégies de course, et de la saison 2026 en cours. Tu réponds principalement en français de manière enthousiaste, précise et factuelle. Utilise des émojis pertinents pour vivifier tes réponses. Structure bien tes réponses avec des sauts de ligne.`;
+const F1_SYSPROMPT = `Tu es un expert passionné de Formule 1 avec une connaissance encyclopédique de toute l'histoire de la F1 (1950 à aujourd'hui), des pilotes, équipes, circuits, règlements techniques et sportifs, des stratégies de course, et de la saison 2026 en cours. Kimi Antonelli (Mercedes) mène le championnat pilotes 2026 avec 72 pts, Russell 2e (63 pts), Leclerc 3e (49 pts). Mercedes domine les constructeurs (135 pts). Tu réponds principalement en français de manière enthousiaste, précise et factuelle. Utilise des émojis. Structure bien tes réponses avec des sauts de ligne.`;
+
+/* Nettoie la réponse brute — élimine les blobs JSON/reasoning_content */
+function sanitizeAIResponse(raw) {
+  if (!raw || typeof raw !== 'string') return '❓ Réponse vide.';
+
+  // Cas 1 : réponse JSON standard OpenAI { choices:[{message:{content:...}}] }
+  try {
+    const j = JSON.parse(raw);
+    if (j?.choices?.[0]?.message?.content) return j.choices[0].message.content.trim();
+    if (j?.content) return String(j.content).trim();
+    if (j?.text) return String(j.text).trim();
+  } catch(e) {}
+
+  // Cas 2 : la réponse CONTIENT un gros bloc JSON au début ({"role":..., "reasoning_content":...})
+  // On le retire et on garde ce qui suit
+  let cleaned = raw;
+
+  // Supprimer les blocs {"role":... } qui contiennent reasoning_content
+  cleaned = cleaned.replace(/^\s*\{[^}]*"reasoning_content"[\s\S]*?\}\s*/m, '');
+  // Supprimer les balises <think>...</think> ou similaires
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  // Supprimer les lignes qui ressemblent à du JSON brut ("{" suivi de "role" ou "reasoning")
+  cleaned = cleaned.replace(/^[\s]*\{[\s\S]{0,2000}"tool_calls"[\s\S]*?\}\s*$/m, '');
+  // Supprimer les lignes vides multiples
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+  return cleaned.trim() || '❓ Réponse illisible, veuillez réessayer.';
+}
 
 async function callAI(messages, systemPrompt) {
   const controller = new AbortController();
@@ -586,12 +684,51 @@ async function callAI(messages, systemPrompt) {
           ...messages
         ],
         model: 'openai',
+        private: true,
+        stream: false
+      })
+    });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    const clean = sanitizeAIResponse(raw);
+    // Vérification anti-blob : si > 40% de caractères JSON suspects, c'est un artefact
+    const jsonDensity = (clean.match(/[{}\[\]":\\]/g) || []).length / (clean.length || 1);
+    if (jsonDensity > 0.25 && clean.length > 200) {
+      throw new Error('response_corrupted');
+    }
+    return clean;
+  } catch(e) {
+    clearTimeout(timer);
+    if (e.message === 'response_corrupted') {
+      // Retry avec modèle différent
+      return await callAIFallback(messages, systemPrompt);
+    }
+    throw e;
+  }
+}
+
+async function callAIFallback(messages, systemPrompt) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 25000);
+  try {
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt || F1_SYSPROMPT },
+          ...messages
+        ],
+        model: 'mistral',
         private: true
       })
     });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
+    const raw = await res.text();
+    return sanitizeAIResponse(raw);
   } catch(e) {
     clearTimeout(timer);
     throw e;
@@ -687,11 +824,33 @@ function loadStream() {
 /* ============================================================
    GEMINI CHAT
    ============================================================ */
+const CHAT_COOLDOWN_MS = 8000; // 8 secondes entre chaque message
+let chatLastSent = 0;
+let chatCooldownTimer = null;
+
 async function sendChat() {
   const inp = document.getElementById('chatInp');
+  const sendBtn = document.getElementById('chatSendBtn');
   const text = inp.value.trim();
   if (!text) return;
+
+  // Vérifier le cooldown
+  const now = Date.now();
+  const elapsed = now - chatLastSent;
+  if (elapsed < CHAT_COOLDOWN_MS) {
+    const remaining = Math.ceil((CHAT_COOLDOWN_MS - elapsed) / 1000);
+    addMsg('ai', `⏳ Patientez encore ${remaining}s avant d'envoyer un nouveau message.`);
+    return;
+  }
+
   inp.value = '';
+  inp.disabled = true;
+  sendBtn.disabled = true;
+  chatLastSent = Date.now();
+
+  // Lancer le countdown visuel sur le bouton
+  startChatCooldown(sendBtn, inp);
+
   addMsg('usr', text);
   chatHist.push({ role: 'user', content: text });
   const tid = showTyping();
@@ -704,6 +863,24 @@ async function sendChat() {
     rmTyping(tid);
     addMsg('ai', `❌ Erreur de connexion. Veuillez réessayer.`);
   }
+}
+
+function startChatCooldown(btn, inp) {
+  if (chatCooldownTimer) clearInterval(chatCooldownTimer);
+  let remaining = Math.ceil(CHAT_COOLDOWN_MS / 1000);
+  btn.textContent = `⏳ ${remaining}s`;
+  chatCooldownTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(chatCooldownTimer);
+      btn.textContent = 'Envoyer ↑';
+      btn.disabled = false;
+      inp.disabled = false;
+      inp.focus();
+    } else {
+      btn.textContent = `⏳ ${remaining}s`;
+    }
+  }, 1000);
 }
 
 function addMsg(type, txt) {
@@ -1218,13 +1395,41 @@ async function loadTelemetry() {
     try {
       const sr = await fetchT('https://api.openf1.org/v1/sessions?year=2026');
       allSessions = await sr.json() || [];
+      const now = new Date();
       const sel = document.getElementById('teleSessionSel');
-      sel.innerHTML = allSessions.reverse().map(s =>
-        `<option value="${s.session_key}">${s.meeting_name} · ${s.session_name} (${new Date(s.date_start).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})})</option>`
-      ).join('');
+
+      // Trier du plus récent au plus ancien
+      const sorted = [...allSessions].sort((a,b) => new Date(b.date_start) - new Date(a.date_start));
+
+      // Auto-sélection : session de course (Race) du GP le plus proche passé
+      // Priorité : 1) Course en cours (LIVE)  2) Dernière course terminée  3) Dernière session quelconque
+      const liveSession = sorted.find(s => new Date(s.date_start) <= now && new Date(s.date_end||s.date_start) >= now);
+      const lastRace = sorted.find(s => s.session_type === 'Race' && new Date(s.date_start) <= now);
+      const autoSession = liveSession || lastRace || sorted[0];
+
+      // Icônes par type de session
+      const sessIcon = t => ({Race:'🏁',Qualifying:'⏱',Sprint:'⚡','Sprint Qualifying':'⚡','Sprint Shootout':'⚡',Practice:'🔧'}[t] || '📋');
+      // Couleur de surlignage pour la session auto-sélectionnée
+      const flagEmoji = n => {
+        const f = {Australia:'🇦🇺',China:'🇨🇳',Japan:'🇯🇵',Bahrain:'🇧🇭',Miami:'🇺🇸',Canada:'🇨🇦',
+          Monaco:'🇲🇨',Spain:'🇪🇸',Austria:'🇦🇹','Great Britain':'🇬🇧',Belgium:'🇧🇪',Hungary:'🇭🇺',
+          Netherlands:'🇳🇱',Italy:'🇮🇹',Madrid:'🇪🇸',Azerbaijan:'🇦🇿',Singapore:'🇸🇬',
+          'United States':'🇺🇸',Mexico:'🇲🇽',Brazil:'🇧🇷','Las Vegas':'🇺🇸',Qatar:'🇶🇦','Abu Dhabi':'🇦🇪'};
+        return Object.entries(f).find(([k]) => n?.includes(k))?.[1] || '🏎';
+      };
+
+      sel.innerHTML = sorted.map(s => {
+        const name = s.meeting_name || s.country_name || s.circuit_short_name || 'Session';
+        const date = new Date(s.date_start).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+        const icon = sessIcon(s.session_type || s.session_name);
+        const flag = flagEmoji(name);
+        const isAuto = autoSession && s.session_key === autoSession.session_key;
+        return `<option value="${s.session_key}" ${isAuto ? 'selected' : ''}>${flag} ${name} · ${icon} ${s.session_name||s.session_type||''} (${date})</option>`;
+      }).join('');
+
     } catch(e) {}
 
-    // 2) Déterminer session active
+    // 2) Déterminer session active — utilise la valeur du selector (déjà auto-sélectionné ci-dessus)
     const selVal = document.getElementById('teleSessionSel').value;
     let session = selVal ? allSessions.find(s => String(s.session_key) === selVal) : null;
     if (!session) session = await getLatestSession();
@@ -1258,10 +1463,12 @@ async function loadTelemetry() {
       const opts = drvs.map(d => `<option value="${d.driver_number}">#${d.driver_number} ${d.name_acronym}</option>`).join('');
       document.getElementById('lapTeleDriverSel').innerHTML = '<option value="">Tous</option>' + opts;
       document.getElementById('carDataDriverSel').innerHTML = '<option value="">Choisir...</option>' + opts;
+      document.getElementById('locationDriverSel').innerHTML = '<option value="">Choisir...</option>' + opts;
     } catch(e) {}
 
     // 4) Charger tous les endpoints en parallèle
-    const [wxRes, flagRes, intRes, posRes, stintRes, pitRes, lapRes, radioRes] = await Promise.allSettled([
+    const [wxRes, flagRes, intRes, posRes, stintRes, pitRes, lapRes, radioRes,
+           champDrvRes, champTeamRes, gridRes, overtakeRes, sessResRes] = await Promise.allSettled([
       fetchT(`https://api.openf1.org/v1/weather?session_key=${teleSessionKey}`),
       fetchT(`https://api.openf1.org/v1/race_control?session_key=${teleSessionKey}`),
       fetchT(`https://api.openf1.org/v1/intervals?session_key=${teleSessionKey}&limit=100`),
@@ -1269,7 +1476,12 @@ async function loadTelemetry() {
       fetchT(`https://api.openf1.org/v1/stints?session_key=${teleSessionKey}`),
       fetchT(`https://api.openf1.org/v1/pit?session_key=${teleSessionKey}`),
       fetchT(`https://api.openf1.org/v1/laps?session_key=${teleSessionKey}&limit=200`),
-      fetchT(`https://api.openf1.org/v1/team_radio?session_key=${teleSessionKey}&limit=10`)
+      fetchT(`https://api.openf1.org/v1/team_radio?session_key=${teleSessionKey}&limit=10`),
+      fetchT(`https://api.openf1.org/v1/championship_drivers?session_key=${teleSessionKey}`),
+      fetchT(`https://api.openf1.org/v1/championship_teams?session_key=${teleSessionKey}`),
+      fetchT(`https://api.openf1.org/v1/starting_grid?session_key=${teleSessionKey}`),
+      fetchT(`https://api.openf1.org/v1/overtakes?session_key=${teleSessionKey}`),
+      fetchT(`https://api.openf1.org/v1/session_result?session_key=${teleSessionKey}`)
     ]);
 
     // MÉTÉO
@@ -1472,6 +1684,98 @@ async function loadTelemetry() {
         </div>` : 'Infos meeting non disponibles';
     } catch(e) { document.getElementById('meetingData').textContent = '–'; }
 
+    // CHAMPIONSHIP DRIVERS (beta)
+    try {
+      const chData = await champDrvRes.value.json();
+      const dMap2 = {}; teleDrivers.forEach(d => { dMap2[d.driver_number] = d; });
+      if (chData?.length) {
+        const sorted = [...chData].sort((a,b) => (a.position_current||99) - (b.position_current||99));
+        document.getElementById('champDriverData').innerHTML = `<table class="s-table" style="font-size:12px">
+          <thead><tr><th>Pos</th><th>Pilote</th><th>Pts Avant</th><th>Pts Actuels</th><th>△</th></tr></thead>
+          <tbody>${sorted.map((c,i) => {
+            const d = dMap2[c.driver_number] || {};
+            const col = d.team_colour ? `#${d.team_colour}` : '#888';
+            const diff = (c.points_current || 0) - (c.points_start || 0);
+            const pc = ['p1','p2','p3'][i] || '';
+            return `<tr class="${pc}">
+              <td><span class="pos-n" style="font-size:11px">${c.position_current}</span></td>
+              <td style="font-weight:600">${d.name_acronym || '#'+c.driver_number}<div style="font-size:10px;color:${col}">${d.team_name||''}</div></td>
+              <td style="color:var(--text2);font-family:Orbitron,sans-serif;font-size:10px">${c.points_start||0}</td>
+              <td><span class="pts-badge" style="font-size:11px">${c.points_current||0}</span></td>
+              <td style="font-family:Orbitron,sans-serif;font-size:10px;color:${diff>0?'var(--green)':diff<0?'var(--accent)':'var(--text3)'}">${diff>0?'+'+diff:diff||'–'}</td>
+            </tr>`;
+          }).join('')}</tbody></table>`;
+      } else document.getElementById('champDriverData').innerHTML = '<div style="color:var(--text2);font-size:12px;padding:14px">Données championnats en beta — disponibles sur courses uniquement</div>';
+    } catch(e) { document.getElementById('champDriverData').innerHTML = '<div style="color:var(--text2);font-size:12px;padding:14px">β Non disponible pour cette session</div>'; }
+
+    // CHAMPIONSHIP TEAMS (beta)
+    // (affichée en même section que champDriverData — pas besoin d'élément séparé)
+
+    // STARTING GRID
+    try {
+      const gridData = await gridRes.value.json();
+      const dMap2 = {}; teleDrivers.forEach(d => { dMap2[d.driver_number] = d; });
+      if (gridData?.length) {
+        const sorted = [...gridData].sort((a,b) => (a.grid_position||99) - (b.grid_position||99));
+        document.getElementById('startGridData').innerHTML = `<table class="s-table" style="font-size:12px">
+          <thead><tr><th>Grille</th><th>Pilote</th><th>Équipe</th></tr></thead>
+          <tbody>${sorted.map((g,i) => {
+            const d = dMap2[g.driver_number] || {};
+            const col = d.team_colour ? `#${d.team_colour}` : '#888';
+            const pc = ['p1','p2','p3'][i] || '';
+            return `<tr class="${pc}">
+              <td><span class="pos-n" style="font-size:11px">${g.grid_position}</span></td>
+              <td style="font-weight:600">${d.full_name || d.name_acronym || '#'+g.driver_number}</td>
+              <td style="color:${col};font-size:11.5px">${d.team_name||'–'}</td>
+            </tr>`;
+          }).join('')}</tbody></table>`;
+      } else document.getElementById('startGridData').innerHTML = '<div style="color:var(--text2);font-size:12px;padding:14px">Grille non disponible</div>';
+    } catch(e) { document.getElementById('startGridData').innerHTML = '<div style="color:var(--text2);font-size:12px;padding:14px">–</div>'; }
+
+    // OVERTAKES
+    try {
+      const ovData = await overtakeRes.value.json();
+      const dMap2 = {}; teleDrivers.forEach(d => { dMap2[d.driver_number] = d; });
+      if (ovData?.length) {
+        document.getElementById('overtakesData').innerHTML = ovData.slice(-20).reverse().map(o => {
+          const dA = dMap2[o.driver_number_overtaking] || {};
+          const dB = dMap2[o.driver_number_overtaken] || {};
+          const colA = dA.team_colour ? `#${dA.team_colour}` : 'var(--green)';
+          const colB = dB.team_colour ? `#${dB.team_colour}` : 'var(--text2)';
+          return `<div class="tele-item" style="gap:6px">
+            <span style="font-family:Orbitron,sans-serif;font-size:10px;color:${colA}">${dA.name_acronym||'#'+o.driver_number_overtaking}</span>
+            <span style="color:var(--green);font-size:12px">⬆</span>
+            <span style="font-family:Orbitron,sans-serif;font-size:10px;color:${colB}">${dB.name_acronym||'#'+o.driver_number_overtaken}</span>
+            <span style="flex:1"></span>
+            <span style="font-size:10px;color:var(--text2)">T.${o.lap_number||'–'}</span>
+          </div>`;
+        }).join('');
+      } else document.getElementById('overtakesData').innerHTML = '<div style="color:var(--text2);font-size:12px">Pas de dépassements enregistrés</div>';
+    } catch(e) { document.getElementById('overtakesData').innerHTML = '<div style="color:var(--text2);font-size:12px">–</div>'; }
+
+    // SESSION RESULT
+    try {
+      const srData = await sessResRes.value.json();
+      const dMap2 = {}; teleDrivers.forEach(d => { dMap2[d.driver_number] = d; });
+      if (srData?.length) {
+        const sorted = [...srData].sort((a,b) => (a.position||99) - (b.position||99));
+        document.getElementById('sessionResultData').innerHTML = `<table class="s-table" style="font-size:12.5px">
+          <thead><tr><th>Pos</th><th>Pilote</th><th>Équipe</th><th>Points</th><th>Statut</th></tr></thead>
+          <tbody>${sorted.map((r,i) => {
+            const d = dMap2[r.driver_number] || {};
+            const col = d.team_colour ? `#${d.team_colour}` : '#888';
+            const pc = ['p1','p2','p3'][i] || '';
+            return `<tr class="${pc}">
+              <td><span class="pos-n">${r.position}</span></td>
+              <td style="font-weight:600">${d.full_name || d.name_acronym || '#'+r.driver_number}</td>
+              <td style="color:${col};font-size:11.5px">${d.team_name||'–'}</td>
+              <td><span class="pts-badge" style="font-size:11px">${r.points_scored||0}</span></td>
+              <td style="font-size:11px;color:${r.status==='Finished'?'var(--green)':'var(--text2)'}">${r.status||'–'}</td>
+            </tr>`;
+          }).join('')}</tbody></table>`;
+      } else document.getElementById('sessionResultData').innerHTML = '<div style="color:var(--text2);font-size:12px;padding:14px">Résultat non encore disponible</div>';
+    } catch(e) { document.getElementById('sessionResultData').innerHTML = '<div style="color:var(--text2);font-size:12px;padding:14px">–</div>'; }
+
   } catch(e) {
     console.error('Telemetry error:', e);
     document.getElementById('sessBar2').innerHTML = `<span style="color:var(--accent)">❌ Erreur OpenF1: ${e.message}</span>`;
@@ -1555,33 +1859,71 @@ async function loadCarDataTele() {
   } catch(e) { el.innerHTML = `<div style="color:var(--accent);font-size:13px;padding:14px">Erreur: ${e.message}</div>`; }
 }
 
-/* ============================================================
-   STANDINGS — Résultats Courses & Meilleurs Tours (OpenF1)
-   ============================================================ */
+async function loadLocationData() {
+  const driverNum = document.getElementById('locationDriverSel').value;
+  if (!driverNum || !teleSessionKey) return;
+  const el = document.getElementById('locationData');
+  el.innerHTML = '<div class="loading-box"><span class="spinner"></span> Chargement GPS...</div>';
+  try {
+    const r = await fetchT(`https://api.openf1.org/v1/location?session_key=${teleSessionKey}&driver_number=${driverNum}&limit=200`);
+    const data = await r.json();
+    if (!data?.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:14px">Pas de données GPS</div>'; return; }
+    const d = teleDrivers.find(x => String(x.driver_number) === String(driverNum)) || {};
+    const col = d.team_colour ? `#${d.team_colour}` : '#27F4D2';
+    const latest = data[data.length - 1];
+    // Calcul plage XY
+    const xs = data.map(p => p.x); const ys = data.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const rangeX = maxX - minX || 1, rangeY = maxY - minY || 1;
+    const W = 340, H = 200;
+    // Tracé SVG du circuit
+    const pts = data.filter((_,i) => i % 3 === 0).map(p => {
+      const px = ((p.x - minX) / rangeX * (W - 20) + 10).toFixed(1);
+      const py = (H - 10 - ((p.y - minY) / rangeY * (H - 20))).toFixed(1);
+      return `${px},${py}`;
+    }).join(' ');
+    // Position actuelle
+    const cx = ((latest.x - minX) / rangeX * (W - 20) + 10).toFixed(1);
+    const cy = (H - 10 - ((latest.y - minY) / rangeY * (H - 20))).toFixed(1);
+    el.innerHTML = `
+      <div style="padding:12px 14px">
+        <div style="font-size:11px;font-weight:700;color:#${d.team_colour||'888'};margin-bottom:8px;font-family:Orbitron,sans-serif">#${driverNum} ${d.name_acronym||''} · ${data.length} points GPS</div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">
+          <polyline points="${pts}" fill="none" stroke="${'#'+col.replace('#','')}" stroke-width="1.5" stroke-opacity="0.6"/>
+          <circle cx="${cx}" cy="${cy}" r="5" fill="${'#'+col.replace('#','')}" stroke="#fff" stroke-width="1.5"/>
+          <text x="${+cx+7}" y="${+cy+4}" fill="white" font-size="9" font-family="monospace">${d.name_acronym||'#'+driverNum}</text>
+        </svg>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">
+          ${mkStat(latest.x?.toFixed(0)||'–', 'X', col)}
+          ${mkStat(latest.y?.toFixed(0)||'–', 'Y', col)}
+          ${mkStat(latest.z?.toFixed(0)||'–', 'Z (alt)', col)}
+        </div>
+        <div style="margin-top:6px;font-size:10px;color:var(--text3)">Dernier point: ${new Date(latest.date).toLocaleTimeString('fr-FR')}</div>
+      </div>`;
+  } catch(e) { el.innerHTML = `<div style="color:var(--accent);font-size:13px;padding:14px">Erreur GPS: ${e.message}</div>`; }
+}
 async function loadRaceResults() {
   const el = document.getElementById('raceResData');
   el.innerHTML = '<div class="loading-box"><span class="spinner"></span> Chargement via OpenF1...</div>';
   try {
-    const ctrl = new AbortController(); setTimeout(() => ctrl.abort(), 8000);
-    const sr = await fetch('https://api.openf1.org/v1/sessions?year=2026&session_type=Race', { signal: ctrl.signal });
-    const sessions = await sr.json();
+    const sessions = await fetchT('https://api.openf1.org/v1/sessions?year=2026&session_type=Race').then(r=>r.json()).catch(()=>[]);
     if (!sessions?.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:14px">Pas de courses 2026 dans OpenF1</div>'; return; }
     const s = sessions[sessions.length - 1];
-    const ctrl2 = new AbortController(); setTimeout(() => ctrl2.abort(), 8000);
-    const [posR, drvR] = await Promise.all([
-      fetch(`https://api.openf1.org/v1/position?session_key=${s.session_key}&limit=300`, { signal: ctrl2.signal }),
-      fetch(`https://api.openf1.org/v1/drivers?session_key=${s.session_key}`, { signal: ctrl2.signal })
+    const [posArr, drvArr] = await Promise.all([
+      fetchT(`https://api.openf1.org/v1/position?session_key=${s.session_key}&limit=300`).then(r=>r.json()).catch(()=>[]),
+      fetchT(`https://api.openf1.org/v1/drivers?session_key=${s.session_key}`).then(r=>r.json()).catch(()=>[])
     ]);
-    const posArr = await posR.json() || [];
-    const drvArr = await drvR.json() || [];
-    const dMap = {}; drvArr.forEach(d => { dMap[d.driver_number] = d; });
+    const posArrSafe = Array.isArray(posArr) ? posArr : [];
+    const drvArrSafe = Array.isArray(drvArr) ? drvArr : [];
+    const dMap = {}; drvArrSafe.forEach(d => { dMap[d.driver_number] = d; });
     const latest = {};
-    posArr.forEach(p => { if (!latest[p.driver_number] || new Date(p.date) > new Date(latest[p.driver_number].date)) latest[p.driver_number] = p; });
+    posArrSafe.forEach(p => { if (!latest[p.driver_number] || new Date(p.date) > new Date(latest[p.driver_number].date)) latest[p.driver_number] = p; });
     const sorted = Object.values(latest).sort((a,b) => a.position - b.position);
     if (!sorted.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:14px">Pas de résultats disponibles</div>'; return; }
     el.innerHTML = `
       <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:12px;color:var(--text2)">
-        📋 ${s.session_name} — ${s.meeting_name} · ${new Date(s.date_start).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+        📋 ${s.session_name||''} — ${s.meeting_name||s.country_name||''} · ${new Date(s.date_start).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
       </div>
       <table class="s-table"><thead><tr><th>Pos</th><th>Pilote</th><th>Équipe</th></tr></thead>
       <tbody>${sorted.slice(0,20).map((p,i) => {
@@ -1601,35 +1943,28 @@ async function loadStandingsLaps() {
   const el = document.getElementById('lapTimesData');
   el.innerHTML = '<div class="loading-box"><span class="spinner"></span></div>';
   try {
-    const ctrl = new AbortController(); setTimeout(() => ctrl.abort(), 8000);
-    const sr = await fetch('https://api.openf1.org/v1/sessions?year=2026', { signal: ctrl.signal });
-    const sessions = await sr.json();
+    const sessions = await fetchT('https://api.openf1.org/v1/sessions?year=2026').then(r=>r.json()).catch(()=>[]);
     if (!sessions?.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:14px">Pas de sessions 2026</div>'; return; }
     const s = sessions[sessions.length - 1];
     const filter = document.getElementById('lapDriverFilter').value;
-    const url = filter
+    const lapUrl = filter
       ? `https://api.openf1.org/v1/laps?session_key=${s.session_key}&driver_number=${filter}&limit=100`
       : `https://api.openf1.org/v1/laps?session_key=${s.session_key}&limit=200`;
-    const ctrl2 = new AbortController(); setTimeout(() => ctrl2.abort(), 8000);
-    const [lapR, drvR] = await Promise.all([
-      fetch(url, { signal: ctrl2.signal }),
-      fetch(`https://api.openf1.org/v1/drivers?session_key=${s.session_key}`, { signal: ctrl2.signal })
+    const [laps, drvs] = await Promise.all([
+      fetchT(lapUrl).then(r=>r.json()).catch(()=>[]),
+      fetchT(`https://api.openf1.org/v1/drivers?session_key=${s.session_key}`).then(r=>r.json()).catch(()=>[])
     ]);
-    const laps = await lapR.json() || [];
-    const drvs = await drvR.json() || [];
-    // Peupler selector
-    const opts = drvs.map(d => `<option value="${d.driver_number}"${filter == d.driver_number ? ' selected':''} >#${d.driver_number} ${d.name_acronym}</option>`).join('');
+    const opts = (drvs||[]).map(d => `<option value="${d.driver_number}"${filter == d.driver_number ? ' selected':''}>#${d.driver_number} ${d.name_acronym}</option>`).join('');
     document.getElementById('lapDriverFilter').innerHTML = '<option value="">Tous les pilotes</option>' + opts;
-    const dMap = {}; drvs.forEach(d => { dMap[d.driver_number] = d; });
+    const dMap = {}; (drvs||[]).forEach(d => { dMap[d.driver_number] = d; });
     if (!laps?.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:14px">Pas de tours disponibles</div>'; return; }
-    // Trouver les meilleurs temps
     const bestLap = laps.filter(l => l.lap_duration).reduce((best, l) => !best || l.lap_duration < best.lap_duration ? l : best, null);
     const fmtT = t => t ? (t < 60 ? t.toFixed(3) : `${Math.floor(t/60)}:${(t%60).toFixed(3).padStart(6,'0')}`) : '–';
     el.innerHTML = `
       ${bestLap ? `<div style="padding:10px 14px;background:rgba(176,0,224,0.1);border-bottom:1px solid rgba(176,0,224,0.3);font-size:12.5px;display:flex;align-items:center;gap:12px">
         <span style="color:var(--purple);font-weight:700">🟣 Meilleur Tour</span>
         <span style="font-family:Orbitron,sans-serif;font-size:13px">${fmtT(bestLap.lap_duration)}</span>
-        <span style="color:var(--text2)">#${bestLap.driver_number} ${(dMap[bestLap.driver_number] || {}).name_acronym || ''} · Tour ${bestLap.lap_number}</span>
+        <span style="color:var(--text2)">#${bestLap.driver_number} ${(dMap[bestLap.driver_number]||{}).name_acronym||''} · Tour ${bestLap.lap_number}</span>
       </div>` : ''}
       <table class="s-table" style="font-size:12px">
         <thead><tr><th>#</th><th>Pilote</th><th>Tour</th><th>Temps</th><th>S1</th><th>S2</th><th>S3</th><th>Vmax</th></tr></thead>
@@ -1641,15 +1976,176 @@ async function loadStandingsLaps() {
             <td style="font-family:Orbitron,sans-serif;font-size:10px;color:${col}">${l.driver_number}</td>
             <td style="font-weight:600;font-size:11.5px">${d.name_acronym || '–'}</td>
             <td style="color:var(--text2)">T${l.lap_number}</td>
-            <td style="font-family:Orbitron,sans-serif;font-size:10.5px;color:${isBest ? 'var(--purple)' : 'var(--text)'}">${isBest ? '🟣' : ''}${fmtT(l.lap_duration)}</td>
+            <td style="font-family:Orbitron,sans-serif;font-size:10.5px;color:${isBest ? 'var(--purple)' : 'var(--text)'}">${isBest?'🟣':''}${fmtT(l.lap_duration)}</td>
             <td style="font-size:10.5px;color:var(--text2)">${fmtT(l.duration_sector_1)}</td>
             <td style="font-size:10.5px;color:var(--text2)">${fmtT(l.duration_sector_2)}</td>
             <td style="font-size:10.5px;color:var(--text2)">${fmtT(l.duration_sector_3)}</td>
-            <td style="font-family:Orbitron,sans-serif;font-size:10px;color:var(--green)">${l.st_speed || '–'}</td>
+            <td style="font-family:Orbitron,sans-serif;font-size:10px;color:var(--green)">${l.st_speed||'–'}</td>
           </tr>`;
         }).join('')}</tbody>
       </table>`;
   } catch(e) { el.innerHTML = `<div style="color:var(--text2);font-size:13px;padding:14px">Erreur: ${e.message}</div>`; }
+}
+
+/* ============================================================
+   HISTORIQUE — Jolpica / Ergast (multi-mirror, CORS-safe)
+   ============================================================ */
+let histRacesCache = {};
+
+// Fetch Ergast-compatible avec 2 miroirs de fallback
+async function ergastFetch(path) {
+  const mirrors = [
+    `https://api.jolpica.com/ergast/f1${path}`,
+    `https://ergast.com/api/f1${path}`
+  ];
+  for (const url of mirrors) {
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 9000);
+      const r = await fetch(url, { signal: ctrl.signal });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j?.MRData) return j;
+    } catch(e) { continue; }
+  }
+  throw new Error('API Ergast inaccessible');
+}
+
+async function loadHistorique() {
+  const year = document.getElementById('histYear').value;
+  const dEl = document.getElementById('histDriverSt');
+  const cEl = document.getElementById('histConstrSt');
+  dEl.innerHTML = '<div class="loading-box"><span class="spinner"></span> Chargement...</div>';
+  cEl.innerHTML = '';
+
+  // Liste des courses pour le selector
+  try {
+    const raceList = await ergastFetch(`/${year}/races.json`);
+    const races = raceList?.MRData?.RaceTable?.Races || [];
+    histRacesCache[year] = races;
+    const sel = document.getElementById('histRace');
+    sel.innerHTML = '<option value="">— Choisir un Grand Prix —</option>' +
+      races.map(r => {
+        const d = new Date(r.date);
+        const fmt = isNaN(d) ? r.date : d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+        return `<option value="${r.round}">${r.round}. ${r.raceName} · ${fmt}</option>`;
+      }).join('');
+  } catch(e) { /* silently skip race list */ }
+
+  // Standings pilotes
+  try {
+    const dData = await ergastFetch(`/${year}/driverStandings.json`);
+    const drv = dData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings || [];
+    const maxDPts = drv[0] ? parseInt(drv[0].points)||1 : 1;
+    const champion = drv[0];
+    dEl.innerHTML = drv.length ? `
+      <div style="padding:8px 14px;background:rgba(255,215,0,0.08);border-bottom:1px solid rgba(255,215,0,0.2);display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🏆</span>
+        <span style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:700;color:var(--gold)">
+          ${champion ? `${FLAGS[champion.Driver?.nationality]||''} ${champion.Driver?.givenName} ${champion.Driver?.familyName} — ${champion.points} pts` : `Saison ${year}`}
+        </span>
+      </div>
+      <table class="s-table" style="font-size:12.5px"><thead><tr><th>Pos</th><th>Pilote</th><th>Équipe</th><th>Pts</th><th>V</th></tr></thead>
+      <tbody>${drv.map((d,i) => {
+        const tc = TEAM_COL[d.Constructors?.[0]?.name] || '#888';
+        const fl = FLAGS[d.Driver?.nationality] || '🏴';
+        const pct = Math.round(parseInt(d.points)/maxDPts*100);
+        const pc = ['p1','p2','p3'][i]||'';
+        return `<tr class="${pc}">
+          <td><span class="pos-n" style="font-size:11px">${d.position}</span></td>
+          <td><div style="font-weight:600">${fl} ${d.Driver?.givenName} ${d.Driver?.familyName}</div>
+            <div style="height:2px;background:var(--bg4);border-radius:1px;margin-top:3px;width:80px">
+              <div style="height:2px;background:${tc};width:${pct}%;border-radius:1px"></div>
+            </div>
+          </td>
+          <td style="color:${tc};font-size:11px">${d.Constructors?.[0]?.name||'–'}</td>
+          <td><span class="pts-badge" style="font-size:11px">${d.points}</span></td>
+          <td style="font-family:Orbitron,sans-serif;font-size:11px">${d.wins}</td>
+        </tr>`;
+      }).join('')}</tbody></table>
+      <div style="padding:6px 14px;font-size:10px;color:var(--text3)">Source: Jolpica / Ergast · ${drv.length} pilotes</div>
+    ` : '<div style="color:var(--text2);font-size:13px;padding:14px">Données pilotes non disponibles pour cette saison</div>';
+  } catch(e) {
+    dEl.innerHTML = `<div style="color:var(--text2);font-size:13px;padding:14px">⚠ ${e.message} — vérifiez votre connexion</div>`;
+  }
+
+  // Standings constructeurs
+  try {
+    cEl.innerHTML = '<div class="loading-box"><span class="spinner"></span></div>';
+    const cData = await ergastFetch(`/${year}/constructorStandings.json`);
+    const con = cData?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings || [];
+    const maxCPts = con[0] ? parseInt(con[0].points)||1 : 1;
+    cEl.innerHTML = con.length ? `
+      <div style="padding:8px 14px;background:rgba(39,244,210,0.06);border-bottom:1px solid rgba(39,244,210,0.15);display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🏭</span>
+        <span style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:700;color:var(--green)">
+          ${con[0] ? `${con[0].Constructor?.name} — ${con[0].points} pts` : `Saison ${year}`}
+        </span>
+      </div>
+      <table class="s-table" style="font-size:12.5px"><thead><tr><th>Pos</th><th>Constructeur</th><th>Nat.</th><th>Pts</th><th>V</th></tr></thead>
+      <tbody>${con.map((c,i) => {
+        const tc = TEAM_COL[c.Constructor?.name] || '#888';
+        const pct = Math.round(parseInt(c.points)/maxCPts*100);
+        const pc = ['p1','p2','p3'][i]||'';
+        return `<tr class="${pc}">
+          <td><span class="pos-n" style="font-size:11px">${c.position}</span></td>
+          <td><span class="t-dot" style="background:${tc}"></span><strong>${c.Constructor?.name}</strong>
+            <div style="height:2px;background:var(--bg4);border-radius:1px;margin-top:3px;width:80px">
+              <div style="height:2px;background:${tc};width:${pct}%;border-radius:1px"></div>
+            </div>
+          </td>
+          <td style="font-size:11px">${c.Constructor?.nationality||'–'}</td>
+          <td><span class="pts-badge" style="font-size:11px">${c.points}</span></td>
+          <td style="font-family:Orbitron,sans-serif;font-size:11px">${c.wins}</td>
+        </tr>`;
+      }).join('')}</tbody></table>
+    ` : '<div style="color:var(--text2);font-size:13px;padding:14px">Données constructeurs non disponibles</div>';
+  } catch(e) {
+    cEl.innerHTML = `<div style="color:var(--text2);font-size:13px;padding:14px">⚠ ${e.message}</div>`;
+  }
+}
+
+async function loadHistoriqueResult() {
+  const year = document.getElementById('histYear').value;
+  const round = document.getElementById('histRace').value;
+  if (!round) return;
+  const titleEl = document.getElementById('histRaceTitle');
+  const resEl  = document.getElementById('histRaceResult');
+  titleEl.style.display = 'flex';
+  resEl.style.display = 'block';
+  resEl.innerHTML = '<div class="loading-box"><span class="spinner"></span> Chargement résultat...</div>';
+
+  try {
+    const data = await ergastFetch(`/${year}/${round}/results.json`);
+    const race = data?.MRData?.RaceTable?.Races?.[0];
+    if (!race) { resEl.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:14px">Résultat non disponible</div>'; return; }
+    const results = Array.isArray(race.Results) ? race.Results : [];
+    titleEl.textContent = `🏁 ${race.raceName||''} ${year} · ${new Date(race.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${race.Circuit?.circuitName||''}`;
+    resEl.innerHTML = results.length ? `
+      <table class="s-table" style="font-size:12.5px">
+        <thead><tr><th>Pos</th><th>Pilote</th><th>Équipe</th><th>Pts</th><th>Statut</th><th>Meilleur T.</th></tr></thead>
+        <tbody>${results.map((r,i) => {
+          const tc = TEAM_COL[r.Constructor?.name] || '#888';
+          const fl = FLAGS[r.Driver?.nationality] || '🏴';
+          const pc = ['p1','p2','p3'][i]||'';
+          const isFastestLap = r.FastestLap?.rank === '1';
+          const statusOk = r.status === 'Finished' || r.status?.startsWith('+');
+          return `<tr class="${pc}">
+            <td><span class="pos-n">${r.position}</span></td>
+            <td><div style="font-weight:600">${fl} ${r.Driver?.givenName} ${r.Driver?.familyName}</div>
+                <div style="font-size:10.5px;color:var(--text2)">Grille: P${r.grid}</div></td>
+            <td style="color:${tc}">${r.Constructor?.name||'–'}</td>
+            <td><span class="pts-badge" style="font-size:11px">${r.points}</span></td>
+            <td style="font-size:11.5px;color:${statusOk?'var(--green)':'var(--accent)'}">${r.status||'–'}</td>
+            <td style="font-family:Orbitron,sans-serif;font-size:10.5px;color:${isFastestLap?'var(--purple)':'var(--text2)'}">
+              ${isFastestLap?'🟣 ':''}${r.FastestLap?.Time?.time||'–'}
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>` : '<div style="color:var(--text2);font-size:13px;padding:14px">Pas de résultats</div>';
+  } catch(e) {
+    resEl.innerHTML = `<div style="color:var(--text2);font-size:13px;padding:14px">⚠ ${e.message}</div>`;
+  }
 }
 
 /* ============================================================
